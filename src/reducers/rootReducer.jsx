@@ -1,6 +1,7 @@
 const initialState = {
     userName: null,
-    password: null
+    password: null,
+    authenticated: false
 };
 
 function rootReducer(state=initialState, action) {
@@ -11,6 +12,7 @@ function rootReducer(state=initialState, action) {
             }
             new_dict.userName = action.payload.userName
             new_dict.password = action.payload.password
+            new_dict.authenticated = true
             return new_dict
 
         default:

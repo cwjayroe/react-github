@@ -9,7 +9,7 @@ function fetchQuery(
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + process.env.GITHUB_API_KEY
+            'Authorization': 'Bearer 57a079b3fbe9c3eb2780f53140d34c5e0efe0a13'
         },
         body: JSON.stringify({
             query: operation.text,

@@ -2,9 +2,7 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import store from 'store';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import { connect } from "react-redux";
 import { loginUser } from 'actions/loginUser'
 
@@ -15,8 +13,7 @@ class LoginPage extends React.Component {
         this.state = {
             username: '',
             password: '',
-            passwordEmpty: false,
-            userNameEmpty: false,
+            submitted: false,
             errorOccurred: false
         };
     }
@@ -31,8 +28,7 @@ class LoginPage extends React.Component {
         }
 
         try {
-            let githubResponse = await axios.get('https://api.github.com/user', headers)
-
+            await axios.get('https://api.github.com/user', headers)
             return true;
         } catch (error) {
             return false;
@@ -42,13 +38,11 @@ class LoginPage extends React.Component {
     handleLogin = async (event) => {
         event.preventDefault();
 
-        !this.state.username ? this.setState({ userNameEmpty: true }) : this.setState({ userNameEmpty: false })
-        !this.state.password ? this.setState({ passwordEmpty: true }) : this.setState({ passwordEmpty: false })
+        this.setState({ submitted: true })
 
-        if (!this.state.passwordEmpty && !this.state.userNameEmpty) {
+        if (this.state.password && this.state.username) {
             let authenticated = await this.authenticateToGithub();
             
-            console.log(authenticated);
             if (!authenticated) {
                 this.setState({ errorOccurred: true });
                 return;
@@ -58,7 +52,7 @@ class LoginPage extends React.Component {
                 userName: this.state.username,
                 password: this.state.password
             })
-
+            
             this.props.history.push('/view');
         }
     }
@@ -80,14 +74,14 @@ class LoginPage extends React.Component {
         let passwordErrorMessage;
         let authenticationError;
 
-        if (this.state.userNameEmpty) {
+        if (!this.state.userNameEmpty && this.state.submitted) {
             userNameErrorMessage =
                 <Form.Text className="text-muted">
                     Username is required
                 </Form.Text>
         }
 
-        if (this.state.passwordEmpty) {
+        if (!this.state.password && this.state.submitted) {
             passwordErrorMessage =
                 <Form.Text className="text-muted">
                     Password is required
@@ -116,8 +110,8 @@ class LoginPage extends React.Component {
                         <Form.Control type="password" placeholder="Password" onChange={this.handlePassword} value={this.state.password} />
                         {passwordErrorMessage}
                     </Form.Group>
-                    <Button variant="primary" type="submit">
-                        Submit
+                    <Button variant="primary" type="submit" block>
+                        Login
                     </Button>
                     {authenticationError}
                 </Form>
@@ -126,6 +120,9 @@ class LoginPage extends React.Component {
     }
 }
 
+const mapStateToProps = state => {
+    return { authenticated: state.authenticated };
+}
 
 function mapDispatchToProps(dispatch) {
     return {
@@ -133,6 +130,6 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
-const ConnectedLoginPage = connect(null, mapDispatchToProps)(LoginPage);
+const ConnectedLoginPage = connect(mapStateToProps, mapDispatchToProps)(LoginPage);
 
 export default ConnectedLoginPage;
